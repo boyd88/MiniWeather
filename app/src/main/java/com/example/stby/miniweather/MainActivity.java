@@ -8,9 +8,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -49,6 +55,39 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
     }
 
+    private void parseXML(String xmldata){
+        try{
+            XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
+            XmlPullParser xmlPullParser = fac.newPullParser();
+            xmlPullParser.setInput(new StringReader(xmldata));
+            int eventType = xmlPullParser.getEventType();
+            Log.d("myweather","parseXML");
+            while (eventType != XmlPullParser.END_DOCUMENT){
+                switch(eventType){
+                    //判断当前事件是否为文档开始事件
+                    case XmlPullParser.START_DOCUMENT:
+                        break;
+                        //判断当前事件是否为标签元素开始事件
+                    case XmlPullParser.START_TAG:
+                        if(xmlPullParser.getName().equals("city")){
+                            eventType = xmlPullParser.next();
+                            Log.d("myweather","city:    "+xmlPullParser.getText());
+                        }else if(xmlPullParser.getName().equals("updatetime")){
+                            eventType = xmlPullParser.next();
+                            Log.d("myweather","updatetime:    "+xmlPullParser.getText());
+                        }
+                        break;
+                        //判断当前事件是否为标签元素结束事件
+                }
+                eventType = xmlPullParser.next();
+            }
+        }catch (XmlPullParserException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     /**
      *
      * @param citycode
@@ -76,6 +115,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
                     }
                     String responseStr=response.toString();
                     Log.d("myWeather", responseStr);
+                    parseXML(responseStr);
                 }catch (Exception e){
                     e.printStackTrace();
                 }finally {
