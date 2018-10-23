@@ -44,14 +44,21 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
 
     @Override
-    public void onClick(View view){
-        if(view.getId() == R.id.title_update_btn){
+    public void onClick(View view) {
+        if (view.getId() == R.id.title_update_btn) {
 
-            SharedPreferences sharedPreferences =getSharedPreferences("config",MODE_PRIVATE);
-            String citycode = sharedPreferences.getString("main_city_code","101010100");
-        } else{
-            Log.d("myWeather","网络挂了");
-            Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
+            SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+            String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+            Log.d("myWeather", cityCode);
+
+            if(NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE){
+                Log.d("myWeather","网络OK");
+                queryWeatherCode(cityCode);
+            }else
+            {
+                Log.d("myWeather","网络挂了");
+                Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -61,7 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
             XmlPullParser xmlPullParser = fac.newPullParser();
             xmlPullParser.setInput(new StringReader(xmldata));
             int eventType = xmlPullParser.getEventType();
-            Log.d("myweather","parseXML");
+            Log.d("myWeather","parseXML");
             while (eventType != XmlPullParser.END_DOCUMENT){
                 switch(eventType){
                     //判断当前事件是否为文档开始事件
@@ -71,10 +78,10 @@ public class MainActivity extends Activity implements View.OnClickListener{
                     case XmlPullParser.START_TAG:
                         if(xmlPullParser.getName().equals("city")){
                             eventType = xmlPullParser.next();
-                            Log.d("myweather","city:    "+xmlPullParser.getText());
+                            Log.d("myWeather","city:    "+xmlPullParser.getText());
                         }else if(xmlPullParser.getName().equals("updatetime")){
                             eventType = xmlPullParser.next();
-                            Log.d("myweather","updatetime:    "+xmlPullParser.getText());
+                            Log.d("myWeather","updatetime:    "+xmlPullParser.getText());
                         }
                         break;
                         //判断当前事件是否为标签元素结束事件
