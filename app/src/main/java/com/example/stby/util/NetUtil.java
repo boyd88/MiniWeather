@@ -1,4 +1,4 @@
-package stby.util;
+package com.example.stby.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

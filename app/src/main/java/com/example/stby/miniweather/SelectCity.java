@@ -9,12 +9,14 @@ import android.content.Intent;
 public class SelectCity extends Activity implements View.OnClickListener{
 
     private ImageView mBackBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //关联select_city.xml
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.select_city);
-
+        //获取布局中的返回控件
+        //为返回按钮设置单击事件监听
         mBackBtn = (ImageView) findViewById(R.id.title_back);
         mBackBtn.setOnClickListener(this);
     }
