@@ -20,8 +20,11 @@ public class CityDB {
 
     public List<City> getAllCity() {
         List<City> list = new ArrayList<City>();
+
+        //SQL语句，按行抽取所有的城市相关信息
         Cursor c = db.rawQuery("SELECT * from " + CITY_TABLE_NAME, null);
         while (c.moveToNext()) {
+            //将数据整理，转换成string类型，并整合打包到list中
             String province = c.getString(c.getColumnIndex("province"));
             String city = c.getString(c.getColumnIndex("city"));
             String number = c.getString(c.getColumnIndex("number"));

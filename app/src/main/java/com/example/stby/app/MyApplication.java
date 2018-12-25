@@ -21,6 +21,7 @@ public class MyApplication extends Application{
     private CityDB mCityDB;
 
     private List<City> mCityList;
+
     @Override
     public void onCreate(){
         super.onCreate();
@@ -31,6 +32,7 @@ public class MyApplication extends Application{
         initCityList();
     }
     private void initCityList(){
+        //
         mCityList = new ArrayList<City>();
         new Thread(new Runnable() {
             @Override
@@ -42,14 +44,17 @@ public class MyApplication extends Application{
     }
 
     private boolean prepareCityList(){
+        //获取城市列表
         mCityList = mCityDB.getAllCity();
         int i = 0;
         for(City city : mCityList){
+            //打印城市代码和城市名称
             i++;
             String cityName = city.getCity();
             String cityCode = city.getNumber();
             Log.d(TAG,cityCode+":"+cityName);
         }
+        //打印城市数量
         Log.d(TAG,"i="+i);
         return true;
     }
@@ -61,6 +66,7 @@ public class MyApplication extends Application{
     }
 
     private CityDB openCityDB(){
+
         String path = "/data"
                 + Environment.getDataDirectory().getAbsolutePath()
                 + File.separator + getPackageName()
@@ -77,7 +83,7 @@ public class MyApplication extends Application{
                     + File.separator;
             File dirFirstFolder = new File(pathfolder);
             if(!dirFirstFolder.exists()){
-                dirFirstFolder.mkdir();
+                dirFirstFolder.mkdirs();
                 Log.i("MyApp","mkdirs");
             }
             Log.i("MyApp","db is not exists");
