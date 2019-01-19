@@ -232,6 +232,23 @@
                     android:textSize="20sp"/>
             </RelativeLayout>
         </RelativeLayout>
+        <!-- 六⽇日天⽓气信息 -->
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="5dp"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="5dp">
+            <!--展示滑动⻚页⾯面-->
+            <android.support.v4.view.ViewPager
+                android:id="@+id/sixday"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:paddingBottom="5dp"
+                >
+            </android.support.v4.view.ViewPager>
 
+        </RelativeLayout>
     </LinearLayout>
 </RelativeLayout>

@@ -6,12 +6,17 @@ import android.content.SharedPreferences;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.example.stby.adapter.GuideAdapter;
 import com.example.stby.bean.TodayWeather;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -25,6 +30,8 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.stby.util.NetUtil;
 
@@ -34,11 +41,23 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     private ImageView mUpdateBtn;
     private ImageView mCitySelect;
+    private ImageView mTitleLocation;
 
     //定义相关控件
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv,
                      temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
+
+    //六天天⽓气信息展示
+    //显示两个展示⻚页
+    private ViewPager viewPage;
+    private List<View> views;
+    private GuideAdapter guideAdapter;
+    //为引导⻚页增加⼩小圆点
+    private  TextView[] day0=new TextView[4],day1=new TextView[4],
+            day2=new TextView[4],day3=new TextView[4],day4=new TextView[4],day5=new TextView[4];
+    private  ImageView[] sixDayImage=new ImageView[6];
+
 
     private Handler mHandler = new Handler(){
         public void handleMessage(android.os.Message msg){
@@ -51,13 +70,25 @@ public class MainActivity extends Activity implements View.OnClickListener{
             }
         }
     };
+
+    public LocationClient mLocationClient = null;
+    private MyLocationListener mLocationListener = new MyLocationListener();
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);//将weather_info.xml作为当前activity的布局
 
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//获取布局中的刷新控件
-        mUpdateBtn.setOnClickListener(this);//为刷新按钮设单击事件监听
+        mUpdateBtn.setOnClickListener(this);//监听刷新的单击事件
+        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);//获取布局中的城市控件
+        mCitySelect.setOnClickListener(this);//监听城市管理的单击事件
+        mTitleLocation = (ImageView) findViewById(R.id.title_location);//获取布局中的定位控件
+        mTitleLocation.setOnClickListener(this);//监听定位的单击事件
+
+        mLocationClient = new LocationClient(getApplicationContext());//声明LocationClient类
+        mLocationClient.registerLocationListener(mLocationListener);//注册监听函数
+        initLocation();
 
         //检查网络状态
         if(NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE){
@@ -70,12 +101,41 @@ public class MainActivity extends Activity implements View.OnClickListener{
             Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
         }
 
-        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);//获取布局中的城市控件
-        mCitySelect.setOnClickListener(this);//为城市管理按钮设置单击事件监听
+        initView();
 
+
+        //初始化界⾯面控件
         initView();
     }
 
+
+
+    //配置定位SDK参数
+    private void initLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        //设置定位模式：低功耗
+        option.setCoorType("bd09ll");
+        //设置返回经纬度坐标类型：百度经纬度坐标
+        option.setScanSpan(0);
+        option.setIsNeedAddress(true);
+        //设置发起定位请求的间隔，int类型，单位ms
+        option.setOpenGps(true);
+        //设置是否使用gps
+        option.setLocationNotify(true);
+        //设置是否当GPS有效时按照1S/1次频率输出GPS结果
+        option.setIgnoreKillProcess(false);
+        //可选，定位SDK内部是一个service，并放到了独立进程。
+        //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnoreKillProcess(true)
+        option.SetIgnoreCacheException(false);
+        //可选，设置是否收集Crash信息，默认收集，即参数为false
+        option.setEnableSimulateGps(false);
+        //可选，设置是否需要过滤GPS仿真结果，默认需要，即参数为false
+
+        mLocationClient.setLocOption(option);
+        mLocationClient.start();
+        //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
+    }
     void initView(){
         //初始化
         //获取相应控件，将初始值设为N/A
@@ -101,6 +161,94 @@ public class MainActivity extends Activity implements View.OnClickListener{
         temperatureTv.setText("N/A");
         climateTv.setText("N/A");
         windTv.setText("N/A");
+
+        viewPage=(ViewPager) findViewById(R.id.sixday);
+        views = new ArrayList<View>();
+        views.add(LayoutInflater.from(this).inflate(R.layout.threeday1, null));
+        views.add(LayoutInflater.from(this).inflate(R.layout.threeday2, null));
+        guideAdapter=new GuideAdapter(this, views);
+        viewPage.setAdapter(guideAdapter);
+
+        day0[0]=(TextView) views.get(0).findViewById(R.id.day1);
+        day0[1]=(TextView) views.get(0).findViewById(R.id.temperature1);
+        day0[2]=(TextView) views.get(0).findViewById(R.id.climate1);
+        day0[3]=(TextView) views.get(0).findViewById(R.id.wind1);
+        sixDayImage[0]=(ImageView) views.get(0).findViewById(R.id.img1);
+        day1[0]=(TextView) views.get(0).findViewById(R.id.day2);
+        day1[1]=(TextView) views.get(0).findViewById(R.id.temperature2);
+        day1[2]=(TextView) views.get(0).findViewById(R.id.climate2);
+        day1[3]=(TextView) views.get(0).findViewById(R.id.wind2);
+        sixDayImage[1]=(ImageView) views.get(0).findViewById(R.id.img2);
+        day2[0]=(TextView) views.get(0).findViewById(R.id.day3);
+        day2[1]=(TextView) views.get(0).findViewById(R.id.temperature3);
+        day2[2]=(TextView) views.get(0).findViewById(R.id.climate3);
+        day2[3]=(TextView) views.get(0).findViewById(R.id.wind3);
+        sixDayImage[2]=(ImageView) views.get(0).findViewById(R.id.img3);
+        day3[0]=(TextView) views.get(1).findViewById(R.id.day4);
+        day3[1]=(TextView) views.get(1).findViewById(R.id.temperature4);
+        day3[2]=(TextView) views.get(1).findViewById(R.id.climate4);
+        day3[3]=(TextView) views.get(1).findViewById(R.id.wind4);
+        sixDayImage[3]=(ImageView) views.get(1).findViewById(R.id.img4);
+        day4[0]=(TextView) views.get(1).findViewById(R.id.day5);
+        day4[1]=(TextView) views.get(1).findViewById(R.id.temperature5);
+        day4[2]=(TextView) views.get(1).findViewById(R.id.climate5);
+        day4[3]=(TextView) views.get(1).findViewById(R.id.wind5);
+        sixDayImage[4]=(ImageView) views.get(1).findViewById(R.id.img5);
+        day5[0]=(TextView) views.get(1).findViewById(R.id.day6);
+        day5[1]=(TextView) views.get(1).findViewById(R.id.temperature6);
+        day5[2]=(TextView) views.get(1).findViewById(R.id.climate6);
+        day5[3]=(TextView) views.get(1).findViewById(R.id.wind6);
+        sixDayImage[5]=(ImageView) views.get(1).findViewById(R.id.img6);
+    }
+
+    //更新六天天气
+    void updateSixWeather(TextView[] days,int i,TodayWeather todayWeather) {
+        days[0].setText(todayWeather.sixWeather[i].getDate());
+        days[1].setText(todayWeather.sixWeather[i].getLow()+"~"+todayWeather.sixWeather[i].getHigh());
+        days[2].setText(todayWeather.sixWeather[i].getType());
+        days[3].setText(todayWeather.sixWeather[i].getFengxiang());
+
+        if(days[2].getText().toString().contains("暴雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_baoxue);
+        }else if(days[2].getText().toString().contains("暴雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_baoyu);
+        }else if(days[2].getText().toString().contains("大雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_dayu);
+        }else if(days[2].getText().toString().contains("大暴雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_dabaoyu);
+        }else if(days[2].getText().toString().contains("大雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_daxue);
+        }else if(days[2].getText().toString().contains("多云")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_duoyun);
+        }else if(days[2].getText().toString().contains("雷阵雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_leizhenyu);
+        }else if(days[2].getText().toString().contains("雷阵雨冰雹")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_leizhenyubingbao);
+        }else if(days[2].getText().toString().contains("晴")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_qing);
+        }else if(days[2].getText().toString().contains("沙尘暴")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_shachenbao);
+        }else if(days[2].getText().toString().contains("特大暴雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_tedabaoyu);
+        }else if(days[2].getText().toString().contains("小雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
+        }else if(days[2].getText().toString().contains("小雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
+        }else if(days[2].getText().toString().contains("阴")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_yin);
+        }else if(days[2].getText().toString().contains("雾")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_wu);
+        }else if(days[2].getText().toString().contains("雨夹雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
+        }else if(days[2].getText().toString().contains("阵雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+        }else if(days[2].getText().toString().contains("阵雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_zhenyu);
+        }else if(days[2].getText().toString().contains("中雪")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_zhongxue);
+        }else if(days[2].getText().toString().contains("中雨")){
+            sixDayImage[i].setImageResource(R.drawable.biz_plugin_weather_zhongyu);
+        }
     }
 
     @Override
@@ -131,7 +279,20 @@ public class MainActivity extends Activity implements View.OnClickListener{
                 Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
             }
         }
+        if (view.getId() == R.id.title_location) {
+            if(NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE){
+                if(mLocationClient.isStarted()){
+                    mLocationClient.stop();
+                }
+                mLocationClient.start();
+                //queryWeatherCode(mLocationListener.cityCode);
+            }
+
+
+        }
     }
+
+    //SelectCity通过intent返回城市代码，进行信息更新
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == 1 && resultCode == RESULT_OK){
             String newCityCode = data.getStringExtra("cityCode");
@@ -203,22 +364,77 @@ public class MainActivity extends Activity implements View.OnClickListener{
                                 eventType = xmlPullParser.next();
                                 todayWeather.setFengli(xmlPullParser.getText());
                                 fengliCount++;
-                            } else if (xmlPullParser.getName().equals("date") && dateCount == 0) {
+                            } else if (xmlPullParser.getName().equals("date_1")&&dateCount<6) {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setDate(xmlPullParser.getText());
+                                Log.d("myWeather", dateCount+"date_1:    "+xmlPullParser.getText());
+                                todayWeather.sixWeather[dateCount].setDate(xmlPullParser.getText());
                                 dateCount++;
-                            } else if (xmlPullParser.getName().equals("high") && highCount == 0) {
+                            }else if (xmlPullParser.getName().equals("high_1")&&highCount<6) {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setHigh(xmlPullParser.getText().substring(2).trim());
+                                Log.d("myWeather", "high_1:    "+xmlPullParser.getText());
+                                todayWeather.sixWeather[highCount].setHigh(xmlPullParser.getText().split(" ")[1]);
                                 highCount++;
-                            } else if (xmlPullParser.getName().equals("low") && lowCount == 0) {
+                            }else if (xmlPullParser.getName().equals("low_1")&&lowCount<6) {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setLow(xmlPullParser.getText().substring(2).trim());
+                                Log.d("myWeather", "low_1:    "+xmlPullParser.getText().split(" ")[1]);
+                                todayWeather.sixWeather[lowCount].setLow(xmlPullParser.getText().split(" ")[1]);
                                 lowCount++;
-                            } else if (xmlPullParser.getName().equals("type") && typeCount == 0) {
+                            }else if (xmlPullParser.getName().equals("type_1")&&typeCount<6) {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setType(xmlPullParser.getText());
+                                Log.d("myWeather", "type_1:    "+xmlPullParser.getText());
+                                todayWeather.sixWeather[typeCount].setType(xmlPullParser.getText());
                                 typeCount++;
+                            }else if (xmlPullParser.getName().equals("fengxiang")&&fengxiangCount<6&&fengxiangCount==0) {
+                                eventType = xmlPullParser.next();
+                                todayWeather.setFengxiang(xmlPullParser.getText());
+                                Log.d("myWeather", "fengxiang"+fengxiangCount+xmlPullParser.getText());
+                            }else if (xmlPullParser.getName().equals("fx_1")&&fengxiangCount<6) {
+                                eventType = xmlPullParser.next();
+                                Log.d("myWeather", "fx_1:    "+xmlPullParser.getText());
+                                todayWeather.sixWeather[fengxiangCount].setFengxiang(xmlPullParser.getText());
+                                fengxiangCount++;
+                            }else if (xmlPullParser.getName().equals("fengxiang")&&fengxiangCount<6&&fengxiangCount!=0) {
+                                eventType = xmlPullParser.next();
+                                todayWeather.sixWeather[fengxiangCount].setFengxiang(xmlPullParser.getText());
+                                Log.d("myWeather", "fengxiang"+fengxiangCount+xmlPullParser.getText());
+                                fengxiangCount++;
+                            }else if (xmlPullParser.getName().equals("date")&&dateCount<6) {
+                                eventType = xmlPullParser.next();
+                                if (dateCount==1) {
+                                    todayWeather.setDate(xmlPullParser.getText());
+                                }
+                                Log.d("myWeather", "dateCount"+dateCount+xmlPullParser.getText());
+                                todayWeather.sixWeather[dateCount].setDate(xmlPullParser.getText());
+                                dateCount++;
+                            }else if (xmlPullParser.getName().equals("high")&&highCount<6) {
+                                eventType = xmlPullParser.next();
+                                if(highCount==1) {
+                                    todayWeather.setHigh(xmlPullParser.getText().split(" ")[1]);
+                                }
+                                todayWeather.sixWeather[highCount].setHigh(xmlPullParser.getText().split(" ")[1]);
+                                Log.d("myWeather", "high:    "+ highCount+highCount+xmlPullParser.getText());
+                                highCount++;
+                            }else if (xmlPullParser.getName().equals("low")&&lowCount<6) {
+                                eventType = xmlPullParser.next();
+                                if(lowCount==1) {
+                                    todayWeather.setLow(xmlPullParser.getText().split(" ")[1]);
+                                }
+                                Log.d("myWeather", "low:    "+lowCount+xmlPullParser.getText());
+                                todayWeather.sixWeather[lowCount].setLow(xmlPullParser.getText().split(" ")[1]);
+                                lowCount++;
+                            }else if (xmlPullParser.getName().equals("type")&&typeCount<6) {
+                                eventType = xmlPullParser.next();
+                                if(typeCount==1) {
+                                    todayWeather.setType(xmlPullParser.getText());
+                                    Log.d("myWeather", "todayWeather.setType(xmlPullParser.getText());"+ typeCount+xmlPullParser.getText());
+                                }
+                                Log.d("myWeather", "type:    "+ typeCount+xmlPullParser.getText());
+                                todayWeather.sixWeather[typeCount].setType(xmlPullParser.getText());
+                                typeCount++;
+                            }else if (xmlPullParser.getName().equals("night")||xmlPullParser.getName().equals("night_1")) {
+                                for (int i = 0; i < 9; i++) {
+                                    eventType = xmlPullParser.next();
+                                }
                             }
                         }
                         break;
@@ -237,6 +453,19 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
 
     void updateTodayWeather(TodayWeather todayWeather){
+        //六天的天气更新
+        updateSixWeather(day0,0,todayWeather);
+        updateSixWeather(day1,1,todayWeather);
+        updateSixWeather(day2,2,todayWeather);
+        updateSixWeather(day3,3,todayWeather);
+        updateSixWeather(day4,4,todayWeather);
+        updateSixWeather(day5,5,todayWeather);
+
+        day0[0].setText(todayWeather.sixWeather[0].getDate());
+        day0[1].setText(todayWeather.sixWeather[0].getLow()+"~"+todayWeather.sixWeather[0].getHigh());
+        day0[2].setText(todayWeather.sixWeather[0].getType());
+        day0[3].setText(todayWeather.sixWeather[0].getDate());
+
         city_name_Tv.setText(todayWeather.getCity()+"天气");
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime()+ "发布");
@@ -249,6 +478,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         windTv.setText("风力:"+todayWeather.getFengli());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
 
+        //更新pm指数对应图标
         if(todayWeather.getPm25()!= null){
             int pm2_5 = Integer.parseInt(todayWeather.getPm25());
             if(pm2_5 <= 50)pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
@@ -260,6 +490,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
 
         String climate = todayWeather.getType();
+        //更新天气类型对应图标
 
         if(climate.equals("暴雪"))
             weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoxue);

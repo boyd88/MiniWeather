@@ -2,6 +2,7 @@ package com.example.stby.bean;
 
 
 public class TodayWeather {
+
     private String city;
     private String updatetime;
     private String wendu;
@@ -14,6 +15,7 @@ public class TodayWeather {
     private String high;
     private String low;
     private String type;
+    public Weather [] sixWeather=new Weather[] {new Weather(),new Weather(),new Weather(),new Weather(),new Weather(),new Weather()};
 
     public String getCity() {
         return city;

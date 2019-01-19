@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center_horizontal"
+    android:layout_gravity="center_horizontal"
+    android:paddingBottom="5dp"
+    >
+    <!-- 第一天天气 -->      
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_gravity="left">
+        <TextView
+            android:id="@+id/day1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="第一天天气"
+            android:textColor="@android:color/white"
+            android:textSize="13sp" />
+        <!-- 天气情况图片示例 -->
+        <ImageView
+            android:id="@+id/img1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/biz_plugin_weather_qing"
+            android:scaleType="centerInside"
+            />
+        <!-- 温度范围 -->
+        <TextView
+            android:id="@+id/temperature1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="-2℃~7℃"
+            android:textColor="@android:color/white"
+            android:textSize="20.0sp"/>
+        <!-- 天气状况 -->
+        <TextView
+            android:id="@+id/climate1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="多云转晴"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+        <!-- 风力信息 -->
+        <TextView
+            android:id="@+id/wind1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+    </LinearLayout>
+    <!-- 第二天天气 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
+        <TextView
+            android:id="@+id/day2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="第二天天气"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"/>
+        <!-- 天气情况图片示例 -->
+        <ImageView
+            android:id="@+id/img2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/biz_plugin_weather_qing"
+            android:scaleType="centerInside"/>
+        <!-- 温度范围 -->
+        <TextView
+            android:id="@+id/temperature2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="-2℃~7℃"
+            android:textColor="@android:color/white"
+            android:textSize="20.0sp"/>
+        <!-- 天气状况 -->
+        <TextView
+            android:id="@+id/climate2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="多云转晴"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+        <!-- 风力信息 -->
+        <TextView
+            android:id="@+id/wind2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+    </LinearLayout>
+    <!-- 第三天天气 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_gravity="right">
+        <TextView
+            android:id="@+id/day3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="第三天天气"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"/>
+        <!-- 天气情况图片示例 -->
+        <ImageView
+            android:id="@+id/img3"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/biz_plugin_weather_qing"
+            android:scaleType="centerInside"/>
+        <!-- 温度范围 -->
+        <TextView
+            android:id="@+id/temperature3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="-2℃~7℃"
+            android:textColor="@android:color/white"
+            android:textSize="20.0sp"/>
+        <!-- 天气状况 -->
+        <TextView
+            android:id="@+id/climate3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="多云转晴"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+        <!-- 风力信息 -->
+        <TextView
+            android:id="@+id/wind3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:textSize="13.0sp"/>
+    </LinearLayout>    
+</LinearLayout>
